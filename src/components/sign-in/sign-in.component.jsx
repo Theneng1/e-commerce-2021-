@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./sign-in.style.scss";
 import FormInput from "../form/form.component";
 import CustomButton from "../custom-button/custom-button.component";
+import { signInWithGoogle } from "../../firebase/firebase.utils";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -9,7 +10,6 @@ const SignIn = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log({ email, password });
     setEmail("");
     setPassword("");
   };
@@ -50,6 +50,9 @@ const SignIn = () => {
           label="password"
         />
         <CustomButton type="submit">Sign In</CustomButton>
+        <CustomButton onClick={signInWithGoogle}>
+          Sign In With G-mail
+        </CustomButton>
       </form>
     </div>
   );
