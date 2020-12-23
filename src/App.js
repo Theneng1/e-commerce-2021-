@@ -5,35 +5,26 @@ import HomePage from "./pages/homepage/homepage";
 import ShopPage from "./pages/shop/shop.component";
 import SignInAndSignUp from "./pages/sign-in-and-sign-up/signInAndSignUp";
 import Header from "./components/header-component/header.component";
-
+import { connect } from "react-redux";
 import { auth, createUserProfileDocument } from "./firebase/firebase.utils";
+import { setCurrentUser } from "./redux/user/user.actions";
 
-export default class App extends React.Component {
-  constructor() {
-    super();
-
-    this.state = {
-      currentUser: "null",
-    };
-  }
-
+class App extends React.Component {
   unsubscribeFromAuth = null;
 
   componentDidMount() {
+    const { setCurrentUser } = this.props;
     this.unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
       if (userAuth) {
         const userRef = await createUserProfileDocument(userAuth);
         userRef.onSnapshot((snapShot) => {
-          this.setState({
-            currentUser: {
-              id: snapShot.id,
-              ...snapShot.data(),
-            },
+          setCurrentUser({
+            id: snapShot.id,
+            ...snapShot.data(),
           });
-          console.log(this.state);
         });
       }
-      this.setState({ currentUser: userAuth });
+      setCurrentUser(userAuth);
     });
   }
 
@@ -44,7 +35,7 @@ export default class App extends React.Component {
   render() {
     return (
       <div>
-        <Header currentUser={this.state.currentUser} />
+        <Header />
         <Switch>
           <Route exact path="/" component={HomePage} />
           <Route path="/shop" component={ShopPage} />
@@ -55,31 +46,8 @@ export default class App extends React.Component {
   }
 }
 
-// export default function App() {
-//   const [currentUser, setCurrentUser] = useState(null);
+const mapDispatchToProps = (dispatch) => ({
+  setCurrentUser: (user) => dispatch(setCurrentUser(user)),
+});
 
-//   // const [unsubscribeFromAuth, setUnsubscribeFromAuth] = useState(null);
-
-//   useEffect(() => {
-//     auth.onAuthStateChanged((user) => {
-//       setCurrentUser(user);
-//       console.log(user);
-//     });
-//   }, [currentUser]);
-
-//   const signOutClear = () => {
-//     auth.signOut();
-//     setCurrentUser(null);
-//   };
-
-// return (
-//   <div>
-//     <Header currentUser={currentUser} clearSignOut={signOutClear} />
-//     <Switch>
-//       <Route exact path="/" component={HomePage} />
-//       <Route path="/shop" component={ShopPage} />
-//       <Route path="/signIn" component={SignInAndSignUp} />
-//     </Switch>
-//   </div>
-// );
-// }
+export default connect(null, mapDispatchToProps)(App);
